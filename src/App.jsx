@@ -474,68 +474,97 @@ function App() {
   const previous7DaysItems = filteredHistory.filter(item => !item.isPinned && (now - item.id) >= ONE_DAY && (now - item.id) < 7 * ONE_DAY);
   const olderItems = filteredHistory.filter(item => !item.isPinned && (now - item.id) >= 7 * ONE_DAY);
 
+  const [editingId, setEditingId] = useState(null);
+  const [tempTitle, setTempTitle] = useState("");
   const renderHistoryItem = (item) => (
-    <div 
-      key={item.id} 
-      className="relative rounded-xl px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer group flex items-center justify-between mb-1"
-    >
-      <div onClick={() => loadHistoryItem(item)} className="flex-1 min-w-0 pr-14">
-        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate pr-2">{item.title}</p>
-      </div>
-      
-      <div className="flex items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
-        <button 
-          onClick={(e) => {
-            e.stopPropagation(); // Don't trigger chat load
-            setChatToShare(item);
-            setShareFormat('text'); // Default format for history
-            setShowShareModal(true);
+  <div 
+    key={item.id} 
+    className="relative rounded-xl px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer group flex items-center justify-between mb-1"
+  >
+    {/* --- CHANGED HERE: Conditional Rendering for Rename --- */}
+    <div className="flex-1 min-w-0 pr-14">
+      {editingId === item.id ? (
+        <input
+          autoFocus
+          className="w-full bg-transparent text-sm font-medium text-gray-800 dark:text-white outline-none border-b border-blue-500"
+          value={tempTitle}
+          onChange={(e) => setTempTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setHistory(prev => prev.map(h => h.id === item.id ? { ...h, title: tempTitle } : h));
+              setEditingId(null);
+            }
           }}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors"
-        >
-          <Share2 size={14} className="text-gray-500 dark:text-gray-400" />
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === item.id ? null : item.id); }}
-          className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition-colors"
-        >
-          <MoreVertical size={16} />
-        </button>
-      </div>
-
-      {activeMenuId === item.id && (
-        <div className="absolute top-10 right-2 w-32 bg-white/60 dark:bg-black/50 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-lg rounded-xl overflow-hidden z-50 animate-fade-in">
-          <button 
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              setHistory(prev => prev.map(h => h.id === item.id ? { ...h, isPinned: !h.isPinned } : h)); 
-              setActiveMenuId(null); 
-            }} 
-            className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 transition-colors"
-          >
-            <Pin size={12} /><span>{item.isPinned ? "Unpin" : "Pin"}</span>
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); alert('Renamed!'); setActiveMenuId(null); }} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 transition-colors">
-            <Pencil size={12} /><span>Rename</span>
-          </button>
-          <button onClick={(e) => openShareModal(item, e)} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 transition-colors">
-            <Download size={12} /><span>Download</span>
-          </button>
-          <button 
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              setHistory(prev => prev.filter(h => h.id !== item.id));
-              setActiveMenuId(null);
-            }} 
-            className="w-full text-left px-3 py-2 text-xs font-semibold text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors"
-          >
-            <Trash2 size={12} /><span>Delete</span>
-          </button>
-        </div>
+          onBlur={() => setEditingId(null)}
+        />
+      ) : (
+        <p onClick={() => loadHistoryItem(item)} className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate pr-2">{item.title}</p>
       )}
     </div>
-  );
+    
+    <div className="flex items-center opacity-100 transition-opacity flex-shrink-0">
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          setChatToShare(item);
+          setShareFormat('text');
+          setShowShareModal(true);
+        }}
+        className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors"
+      >
+        <Share2 size={14} className="text-gray-500 dark:text-gray-400" />
+      </button>
+      <button 
+        onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === item.id ? null : item.id); }}
+        className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition-colors"
+      >
+        <MoreVertical size={16} />
+      </button>
+    </div>
 
+    {activeMenuId === item.id && (
+      <div className="absolute top-10 right-2 w-32 bg-white/60 dark:bg-black/50 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-lg rounded-xl overflow-hidden z-50 animate-fade-in">
+        <button 
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            setHistory(prev => prev.map(h => h.id === item.id ? { ...h, isPinned: !h.isPinned } : h)); 
+            setActiveMenuId(null); 
+          }} 
+          className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 transition-colors"
+        >
+          <Pin size={12} /><span>{item.isPinned ? "Unpin" : "Pin"}</span>
+        </button>
+        
+        {/* --- CHANGED HERE: Updated Rename logic --- */}
+        <button 
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            setEditingId(item.id); 
+            setTempTitle(item.title); 
+            setActiveMenuId(null); 
+          }} 
+          className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 transition-colors"
+        >
+          <Pencil size={12} /><span>Rename</span>
+        </button>
+
+        <button onClick={(e) => openShareModal(item, e)} className="w-full text-left px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 transition-colors">
+          <Download size={12} /><span>Download</span>
+        </button>
+        <button 
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            setHistory(prev => prev.filter(h => h.id !== item.id));
+            setActiveMenuId(null);
+          }} 
+          className="w-full text-left px-3 py-2 text-xs font-semibold text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors"
+        >
+          <Trash2 size={12} /><span>Delete</span>
+        </button>
+      </div>
+    )}
+  </div>
+);
   return (
     <>
       <SignedOut>
