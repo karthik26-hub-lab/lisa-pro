@@ -166,7 +166,7 @@ Wait for the user's selection before proceeding.
     content: systemContent
   });
 
-  
+
   if (formattedMessages.length === 0) {
     throw new Error("Message array is empty after sanitization.");
   }
@@ -174,7 +174,7 @@ Wait for the user's selection before proceeding.
   // 2. Loop through keys (Fallback Mechanism)
   for (let i = 0; i < keys.length; i++) {
     const currentKey = keys[i];
-    
+
     try {
       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -192,7 +192,7 @@ Wait for the user's selection before proceeding.
       if (!response.ok) {
         if (response.status === 429 || response.status === 503) {
           console.warn(`API Key ${i + 1} reached limit/error. Switching to next key...`);
-          continue; 
+          continue;
         }
         throw new Error(`API request failed with status ${response.status}`);
       }
@@ -221,7 +221,7 @@ Wait for the user's selection before proceeding.
           }
         }
       }
-      return; 
+      return;
 
     } catch (error) {
       if (i === keys.length - 1) {
