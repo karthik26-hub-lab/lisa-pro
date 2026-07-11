@@ -162,7 +162,6 @@ Dear Boss,
     content: systemContent
   });
 
-  console.log("🔥 Llama3 SAFE PAYLOAD:", JSON.stringify(formattedMessages, null, 2));
 
   if (formattedMessages.length === 0) {
     throw new Error("Message array is empty after sanitization.");
