@@ -107,48 +107,52 @@ export const generateLisaResponseStream = async (messages, onChunk, activeFlow) 
   } else if (activeFlow === 'mail') {
     flowInstruction = `You are the Mail Drafter. Ask strictly ONE multiple choice question at a time regarding tone, recipient, and core message before drafting the email. Draft the following email in professional English based on the user's request.`;
   } else {
-    flowInstruction = `You are Lisa PRO, an elite, highly advanced AI system architect and copilot. 
-    
-    Your personality is sharp, highly intelligent, concise, and professional (similar to an advanced sci-fi AI like Jarvis or Friday).
-    
-    CRITICAL RULES FOR GENERAL CHAT:
-    1. NEVER use generic, robotic greetings like "I am an AI...", "As an AI language model...", or "How can I assist you today?".
-    2. If the user simply says "Hi", "Hello", or greets you, reply with a short, cool, and elite acknowledgment. (e.g., "Systems online. What are we building today?", or "Ready. Awaiting your command.").
-    3. Keep all general answers extremely direct, zero-fluff, and highly technical. 
-    4. If the user asks you to write code, draft an email, or generate an image prompt in this general chat, briefly provide the answer but subtly remind them that you have dedicated 'Code Builder', 'Mail & Docs', and 'Prompt Architect' modules optimized for those exact tasks.`;
+    flowInstruction = `You are Lisa PRO, an elite, highly advanced AI system architect and copilot. Your personality is sharp, highly intelligent, concise, and professional.`;
   }
 
   const baseRule = `
-CRITICAL FORMATTING RULE: 
-Whenever you ask a multiple-choice question, you MUST format the options EXACTLY like this on new lines:
-[A] <First specific option>
-[B] <Second specific option>
-[C] <Third specific option>
-[D] <Fourth specific option>
+CRITICAL OPERATIONAL RULES:
+
+General Behavior: Never use generic greetings ("I am an AI..."). Keep answers direct, zero-fluff, and technical.
+
+Language Handling: The user will prompt in "Tanglish" (Tamil transliterated). Under NO circumstances are you allowed to output Tamil script. Your entire response must be strictly in professional, high-quality ENGLISH.
+
+Task Specifics:
+
+If asked to write code, draft an email, or generate an image prompt, provide the answer immediately.
+
+If the user asks about something out of scope, subtly remind them of your dedicated modules ('Code Builder', 'Mail & Docs', 'Prompt Architect').
+
+CRITICAL OUTPUT STRUCTURE (ARTIFACT FORMATTING):
+When providing code, prompts, or emails, you MUST follow this pattern exactly:
+
+Provide ONE short, introductory line (e.g., "Here is your requested prompt:").
+
+Insert a double newline.
+
+Wrap ONLY the raw content (Code/Email/Prompt) inside triple backticks (\`\`\`).
+
+Do NOT add any filler text, explanations, or conclusions after the closing backticks.
+
+Example Structure:
+Here is your requested prompt:
+
+\`\`\`
+[Raw content here]
+\`\`\`
+
+MCQ FORMATTING:
+Whenever you ask a multiple-choice question, use this format on new lines:
+[A] <Option 1>
+[B] <Option 2>
+[C] <Option 3>
+[D] <Option 4>
 [E] Custom (I will type my own)
 
-Do not use bolding or extra characters around the brackets. Wait for the user to select before proceeding.
-
-CRITICAL RULE FOR FINAL OUTPUT:
-When providing the final generated code, prompt, or text, you MUST output ONLY the raw content. 
-DO NOT include ANY conversational filler, pleasantries, or introductory/concluding phrases (e.g., NEVER say "Here is the prompt:").
-
-*** ZERO-TOLERANCE LANGUAGE OVERRIDE ***
-1. The user will speak to you in "Tanglish" (Tamil spoken via English alphabet, e.g., "en boss ku email pannanum"). 
-2. UNDER NO CIRCUMSTANCES are you allowed to output text in the Tamil script (e.g., தமிழ்). 
-3. Your entire response, especially the final artifacts (Emails, Code, Prompts, Summaries), MUST be strictly in professional, high-quality ENGLISH.
-4. You can acknowledge the user's intent, but do not translate the response into Tamil. Always reply in English.
-
-CRITICAL ARTIFACT FORMATTING RULE:
-Whenever you generate a final email draft, code snippet, or visual prompt, you MUST wrap ONLY the core content inside triple backticks (\`\`\`). 
-Example: 
-Here is your draft:
-\`\`\`
-Dear Boss,
-...
-\`\`\`
+Wait for the user's selection before proceeding.
 `;
-  if (activeFlow) flowInstruction += baseRule;
+
+  flowInstruction += "\n\n" + baseRule;
 
   const customName = localStorage.getItem('lisaCustomName') || '';
   const customContext = localStorage.getItem('lisaCustomContext') || '';
@@ -162,8 +166,7 @@ Dear Boss,
     content: systemContent
   });
 
-  console.log("🔥 Llama3 SAFE PAYLOAD:", JSON.stringify(formattedMessages, null, 2));
-
+  
   if (formattedMessages.length === 0) {
     throw new Error("Message array is empty after sanitization.");
   }
@@ -180,14 +183,13 @@ Dear Boss,
           "Authorization": `Bearer ${currentKey}`
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant", // CORRECT WORKING MODEL
-          messages: formattedMessages, // Must use the sanitized array here!
+          model: "llama-3.1-8b-instant",
+          messages: formattedMessages,
           stream: true
         })
       });
 
       if (!response.ok) {
-        // If Rate Limit (429) or Server Error (503), try the next key
         if (response.status === 429 || response.status === 503) {
           console.warn(`API Key ${i + 1} reached limit/error. Switching to next key...`);
           continue; 
@@ -219,10 +221,9 @@ Dear Boss,
           }
         }
       }
-      return; // Exit function completely on success
+      return; 
 
     } catch (error) {
-      // If it's the last key in the queue, throw the error to the UI
       if (i === keys.length - 1) {
         console.error("All API keys failed:", error);
         throw error;
