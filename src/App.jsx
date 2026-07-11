@@ -479,11 +479,11 @@ function App() {
       key={item.id} 
       className="relative rounded-xl px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer group flex items-center justify-between mb-1"
     >
-      <div onClick={() => loadHistoryItem(item)} className="flex-1 min-w-0">
+      <div onClick={() => loadHistoryItem(item)} className="flex-1 min-w-0 pr-14">
         <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate pr-2">{item.title}</p>
       </div>
       
-      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+      <div className="flex items-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0">
         <button 
           onClick={(e) => {
             e.stopPropagation(); // Don't trigger chat load
