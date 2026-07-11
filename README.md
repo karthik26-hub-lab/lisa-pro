@@ -6,6 +6,14 @@ Lisa PRO is a highly polished, sci-fi-themed, and context-aware AI interface des
 ![React](https://img.shields.io/badge/Built_with-React-blue?logo=react)
 ![Tailwind](https://img.shields.io/badge/Styled_with-Tailwind_CSS-38B2AC?logo=tailwind-css)
 
+## 📸 Interface Preview
+
+<div align="center">
+  <img src="./assets/hero.png" width="30%" alt="Hero UI">
+  <img src="./assets/artifact.png" width="30%" alt="Artifact Box">
+  <img src="./assets/share.png" width="30%" alt="Share Modal">
+</div>
+
 ## ✨ Key Features
 
 *   **🌌 Dark Glassmorphic UI:** A premium, Apple-style sleek interface with smooth transitions and floating command centers.
